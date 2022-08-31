@@ -268,6 +268,8 @@ namespace ConvertMethodBodyToILCode.Modeles
                         case ExceptionHandlingClauseOptions.Clause:
                             retour.RetourneCommande(tryCatch.TryOffset).debutTry = true;
                             ILCommande blockCatch = retour.RetourneCommande(tryCatch.HandlerOffset);
+                            if (retour[retour.IndexOf(blockCatch) - 1].CodeIL == OpCodes.Leave || retour[retour.IndexOf(blockCatch) - 1].CodeIL == OpCodes.Leave_S)
+                                retour.Remove(retour[retour.IndexOf(blockCatch) - 1]);
                             blockCatch.debutCatch = true;
                             blockCatch.exceptionCatch = tryCatch.CatchType;
                             finCatch = retour.RetourneCommande(tryCatch.HandlerOffset + tryCatch.HandlerLength);
@@ -313,8 +315,6 @@ namespace ConvertMethodBodyToILCode.Modeles
                 else if (instruction.CodeIL.OperandType == OperandType.ShortInlineBrTarget || instruction.CodeIL.OperandType == OperandType.InlineBrTarget)
                 {
                     ILCommande cmdDestination = retour.RetourneCommande(int.Parse(instruction.Param.ToString()));
-                    if (cmdDestination == null)
-                        cmdDestination = retour.RetourneCommande(int.Parse(instruction.Param.ToString()) + 2);
                     if (cmdDestination == null)
                         throw new Exception("Un label n'a pas été trouvé");
                     else
